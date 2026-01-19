@@ -1,5 +1,5 @@
 from database import new_session, TaskORM
-from schemas import TaskAdd, Task, Task_Add_Status
+from schemas import TaskAdd, Task
 from fastapi import HTTPException
 
 from sqlalchemy import select
@@ -17,7 +17,7 @@ class TaskRepository:
             return task.id
         
     @classmethod
-    async def delete_task(cls, id: int) -> Task_Add_Status:
+    async def delete_task(cls, id: int) -> None:
         async with new_session() as session:
             result = await session.execute(
             select(TaskORM).where(TaskORM.id == id)
@@ -29,7 +29,6 @@ class TaskRepository:
 
         await session.delete(task)
         await session.commit()
-        return {"Success": True, "detail": "Task's successfully deleted"}
 
     @classmethod
     async def get_all_tasks(cls) -> list[Task]:

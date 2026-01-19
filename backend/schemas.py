@@ -10,9 +10,5 @@ class Task(TaskAdd):
     model_config = ConfigDict(from_attributes=True)
 
 class Task_ID(BaseModel):
-    ok: bool
+    success: bool
     task_id: int
-
-class Task_Add_Status(BaseModel):
-    ok: bool
-    detail: str
