@@ -1,5 +1,7 @@
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+from sqlalchemy import ForeignKey
 
 engine = create_async_engine('sqlite+aiosqlite:///tasks.db')
 
@@ -8,12 +10,24 @@ new_session = async_sessionmaker(engine, expire_on_commit=False)
 class Base(DeclarativeBase):
     pass
 
+class UserORM(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    username: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(nullable=False)
+
+    tasks: Mapped[list["TaskORM"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+
 class TaskORM(Base):
     __tablename__ = "Tasks"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    task: Mapped[str]
-    status: Mapped[bool]
+    task: Mapped[str] = mapped_column(nullable=False)
+    status: Mapped[bool] = mapped_column(default=False)
+
+    user_id: Mapped[int] = mapped_column (ForeignKey("users.id"), nullable=False)
+    user: Mapped["UserORM"] = relationship(back_populates="tasks")
 
 async def setup_database():
     async with engine.connect() as conn:

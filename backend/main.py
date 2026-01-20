@@ -6,7 +6,7 @@ from database import setup_database
 
 from contextlib import asynccontextmanager
 
-from routers import getHandlers, postHandlers
+from routers import getHandlers, postHandlers, authorization
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,6 +25,7 @@ app.add_middleware(
 
 app.include_router(getHandlers.router)
 app.include_router(postHandlers.router)
+app.include_router(authorization.router)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", reload=True)
