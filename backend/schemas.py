@@ -1,5 +1,9 @@
 from pydantic import BaseModel, ConfigDict
 
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
 class TaskAdd(BaseModel):
     task: str
     status: bool
@@ -10,9 +14,5 @@ class Task(TaskAdd):
     model_config = ConfigDict(from_attributes=True)
 
 class Task_ID(BaseModel):
-    ok: bool
+    success: bool
     task_id: int
-
-class Task_Add_Status(BaseModel):
-    ok: bool
-    detail: str
