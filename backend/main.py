@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from routers import authorizationRouter
+from auth.authorizationRouter import auth_router
 from database import setup_database
 
 from contextlib import asynccontextmanager
@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
     await setup_database()
     yield
 
-app = FastAPI(lifespan=lifespan, title="To-Do-API")
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -26,7 +26,7 @@ app.add_middleware(
 
 app.include_router(getHandlers.router)
 app.include_router(postHandlers.router)
-app.include_router(authorizationRouter.router)
+app.include_router(auth_router)
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", reload=True)
+    uvicorn.run("main:app")

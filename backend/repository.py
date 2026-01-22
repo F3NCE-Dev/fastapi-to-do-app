@@ -1,4 +1,4 @@
-from database import new_session, TaskORM, UserORM
+from database import new_session, TaskORM, UserORM, FileORM
 from schemas import TaskAdd, Task, UserLogin
 from fastapi import HTTPException
 
@@ -65,3 +65,19 @@ class AuthorizationRepository:
         async with new_session() as session:
             result = await session.execute(select(UserORM).where(UserORM.username == username))
             return result.scalar_one_or_none()
+        
+    @classmethod
+    async def get_user_by_id(cls, user_id: int) -> UserORM | None:
+        async with new_session() as session:
+            result = await session.execute(
+                select(UserORM).where(UserORM.id == user_id)
+            )
+            return result.scalar_one_or_none()
+
+    @classmethod
+    async def upload_user_profile_picture(cls, user_id: int, path: str):
+        async with new_session() as session:
+            file = FileORM(user_id=user_id, path=path)
+
+            session.add(file)
+            await session.commit()

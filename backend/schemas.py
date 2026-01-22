@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict
 
 class UserLogin(BaseModel):
     username: str
-    password: str
+    hashed_password: str
 
 class TaskAdd(BaseModel):
     task: str
