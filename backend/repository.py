@@ -1,8 +1,11 @@
 from database import new_session, TaskORM, UserORM, FileORM
-from schemas import TaskAdd, Task, UserLogin
+from schemas import TaskAdd, Task
 from fastapi import HTTPException
 
 from sqlalchemy import select
+
+from config.config import DEFAULT_USER_PROFILE_PIC
+from pathlib import Path
 
 class TaskRepository:
     @classmethod
@@ -50,34 +53,32 @@ class TaskRepository:
             task_schemas = [Task.model_validate(task_model) for task_model in task_models]
             return task_schemas
 
-class AuthorizationRepository:
-    @classmethod
-    async def register_new_user(cls, data: UserLogin):
-        async with new_session() as session:
-            new_user = UserORM(**data.model_dump())
-            session.add(new_user)
-            await session.commit()
-
-            return {"success": True, "detail": f"User {data.username} has successfully added"}
-
-    @classmethod
-    async def get_user_by_username(cls, username: str) -> UserORM | None:
-        async with new_session() as session:
-            result = await session.execute(select(UserORM).where(UserORM.username == username))
-            return result.scalar_one_or_none()
-        
+class AuthorizationRepository:        
     @classmethod
     async def get_user_by_id(cls, user_id: int) -> UserORM | None:
         async with new_session() as session:
-            result = await session.execute(
-                select(UserORM).where(UserORM.id == user_id)
-            )
+            result = await session.execute(select(UserORM).where(UserORM.id == user_id))
             return result.scalar_one_or_none()
-
+        
+class ProfilePicture:
     @classmethod
     async def upload_user_profile_picture(cls, user_id: int, path: str):
         async with new_session() as session:
-            file = FileORM(user_id=user_id, path=path)
+            result = await session.execute(select(FileORM).where(FileORM.user_id == user_id))
+            file = result.scalar_one_or_none()
 
-            session.add(file)
+            if file:
+                file.path = path
+            else:
+                file = FileORM(user_id=user_id, path=path)
+
+                session.add(file)
             await session.commit()
+
+    @classmethod
+    async def get_user_profile_picture_url(cls, user_id: int) -> str | None:
+        async with new_session() as session:
+            result = await session.execute(select(FileORM).where(FileORM.user_id == user_id))
+            file = result.scalar_one_or_none()
+
+            return file.path if file else DEFAULT_USER_PROFILE_PIC
