@@ -1,0 +1,35 @@
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+import uvicorn
+
+from database import setup_database
+
+from contextlib import asynccontextmanager
+
+from routers import AuthorizationRouter, ProfilePicRouter, TaskHandlersRouter
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await setup_database()
+    yield
+
+app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5500", "http://127.0.0.1:5500"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(TaskHandlersRouter.router)
+app.include_router(AuthorizationRouter.router)
+app.include_router(ProfilePicRouter.router)
+
+app.mount("/media", StaticFiles(directory="media"), name="media")
+app.mount("/default_media", StaticFiles(directory="default_media"), name="default_media")
+
+if __name__ == "__main__":
+    uvicorn.run("main:app")

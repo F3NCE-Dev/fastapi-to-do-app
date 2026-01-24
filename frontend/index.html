@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do App</title>
+    <!-- Подключаем Tailwind CSS для стилей -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Подключаем иконки FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Небольшая анимация загрузки */
+        .loader {
+            border-top-color: #3498db;
+            -webkit-animation: spinner 1.5s linear infinite;
+            animation: spinner 1.5s linear infinite;
+        }
+        @keyframes spinner {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center py-10 px-4">
+
+    <!-- Секция Авторизации -->
+    <div id="auth-section" class="w-full max-w-md bg-white rounded-xl shadow-xl overflow-hidden">
+        <div class="bg-indigo-600 p-6 text-white text-center">
+            <h1 class="text-2xl font-bold">Welcome</h1>
+            <p class="text-indigo-200 text-sm mt-1">Login or register</p>
+        </div>
+        
+        <div class="p-6">
+            <!-- Переключатель -->
+            <div class="flex border-b border-gray-200 mb-6">
+                <button id="tab-login" class="flex-1 pb-2 text-indigo-600 border-b-2 border-indigo-600 font-semibold focus:outline-none">Login</button>
+                <button id="tab-register" class="flex-1 pb-2 text-gray-500 hover:text-indigo-600 focus:outline-none">Register</button>
+            </div>
+
+            <!-- Форма Входа -->
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Username</label>
+                    <input type="text" name="username" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                    <input type="password" name="password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white p-3 rounded-lg font-bold hover:bg-indigo-700 transition">Login</button>
+            </form>
+
+            <!-- Форма Регистрации (скрыта) -->
+            <form id="register-form" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Create a username</label>
+                    <input type="text" name="username" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Create a password</label>
+                    <input type="password" name="password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                </div>
+                <button type="submit" class="w-full bg-green-600 text-white p-3 rounded-lg font-bold hover:bg-green-700 transition">Register</button>
+            </form>
+            
+            <p id="auth-error" class="text-red-500 text-center mt-4 text-sm hidden"></p>
+        </div>
+    </div>
+
+    <!-- Секция Приложения (скрыта по умолчанию) -->
+    <div id="app-section" class="hidden bg-white w-full max-w-md rounded-xl shadow-xl overflow-hidden">
+        <!-- Заголовок -->
+        <div class="bg-indigo-600 p-4 text-white flex justify-between items-center shadow-md z-10 relative">
+            <div>
+                <h1 class="text-xl font-bold">My Tasks</h1>
+                <p id="user-greeting" class="text-indigo-200 text-xs mt-0.5">Hello!</p>
+            </div>
+            
+            <!-- Профиль и Меню -->
+            <div class="relative">
+                <button id="profile-btn" class="flex items-center gap-3 focus:outline-none hover:bg-indigo-500 p-1 rounded-lg transition">
+                    <span id="header-username" class="font-medium text-sm hidden sm:block">User</span>
+                    <img id="header-avatar" src="https://via.placeholder.com/40" class="w-10 h-10 rounded-full border-2 border-white object-cover bg-gray-300">
+                </button>
+                
+                <!-- Выпадающее меню -->
+                <div id="profile-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 text-gray-800 z-20 border border-gray-100">
+                    <div class="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                        <p class="text-xs text-gray-500 uppercase font-bold">Account</p>
+                        <p id="dropdown-username" class="font-bold text-gray-800 truncate">User</p>
+                    </div>
+                    <button onclick="openProfileModal()" class="w-full text-left px-4 py-2 hover:bg-indigo-50 text-sm flex items-center gap-2 transition">
+                        <i class="fa-solid fa-user-pen text-indigo-500"></i> Edit
+                    </button>
+                    <button onclick="logout()" class="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 text-sm flex items-center gap-2 transition">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Форма добавления -->
+        <div class="p-4 border-b border-gray-200">
+            <form id="todo-form" class="flex gap-2">
+                <input 
+                    type="text" 
+                    id="todo-input" 
+                    class="flex-1 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+                    placeholder="What needs to be done?" 
+                    required
+                >
+                <button 
+                    type="submit" 
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition flex items-center gap-2"
+                >
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Список задач -->
+        <div class="p-0">
+            <div id="loading" class="hidden p-6 flex justify-center">
+                <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-8 w-8"></div>
+            </div>
+            
+            <ul id="todo-list" class="divide-y divide-gray-100 max-h-[60vh] overflow-y-auto">
+                <!-- Сюда будут добавляться задачи через JS -->
+            </ul>
+            
+            <div id="empty-state" class="hidden p-8 text-center text-gray-500">
+                <i class="fa-solid fa-clipboard-list text-4xl mb-3 text-gray-300"></i>
+                <p>No tasks yet. Add your first one!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно редактирования профиля -->
+    <div id="profile-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all scale-100 m-4">
+            <div class="bg-indigo-600 p-4 text-white flex justify-between items-center">
+                <h2 class="text-lg font-bold">Profile</h2>
+                <button onclick="closeProfileModal()" class="hover:text-gray-200 focus:outline-none"><i class="fa-solid fa-times text-xl"></i></button>
+            </div>
+            
+            <div class="p-6 flex flex-col items-center gap-5">
+                <!-- Загрузка фото -->
+                <div class="relative group cursor-pointer" onclick="document.getElementById('avatar-upload').click()">
+                    <img id="modal-avatar-preview" src="https://via.placeholder.com/150" class="w-32 h-32 rounded-full object-cover border-4 border-indigo-100 shadow-md bg-gray-200">
+                    <div class="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
+                        <i class="fa-solid fa-camera text-white text-3xl"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400 text-center">Click on photo to change<br>(JPG, PNG)</p>
+                
+                <input type="file" id="avatar-upload" class="hidden" accept="image/png, image/jpeg" onchange="previewAvatar(this)">
+                
+                <button onclick="uploadAvatar()" id="save-avatar-btn" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
+                    Save changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // КОНФИГУРАЦИЯ API
+        const BASE_URL = 'http://localhost:8000';
+        
+        // Элементы UI
+        const authSection = document.getElementById('auth-section');
+        const appSection = document.getElementById('app-section');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const tabLogin = document.getElementById('tab-login');
+        const tabRegister = document.getElementById('tab-register');
+        const authError = document.getElementById('auth-error');
+        const userGreeting = document.getElementById('user-greeting');
+        
+        // Элементы Профиля
+        const profileBtn = document.getElementById('profile-btn');
+        const profileDropdown = document.getElementById('profile-dropdown');
+        const profileModal = document.getElementById('profile-modal');
+        const headerUsername = document.getElementById('header-username');
+        const dropdownUsername = document.getElementById('dropdown-username');
+        const headerAvatar = document.getElementById('header-avatar');
+        const modalAvatarPreview = document.getElementById('modal-avatar-preview');
+
+        // Элементы Todo
+        const todoForm = document.getElementById('todo-form');
+        const todoInput = document.getElementById('todo-input');
+        const todoList = document.getElementById('todo-list');
+        const loadingSpinner = document.getElementById('loading');
+        const emptyState = document.getElementById('empty-state');
+
+        // --- УПРАВЛЕНИЕ АВТОРИЗАЦИЕЙ ---
+
+        function getToken() {
+            return localStorage.getItem('access_token');
+        }
+
+        function setToken(token) {
+            localStorage.setItem('access_token', token);
+        }
+
+        function logout() {
+            localStorage.removeItem('access_token');
+            checkAuth();
+        }
+
+        function checkAuth() {
+            const token = getToken();
+            if (token) {
+                authSection.classList.add('hidden');
+                appSection.classList.remove('hidden');
+                fetchTodos(); // Загружаем задачи
+                fetchCurrentUser(); // Загружаем имя пользователя
+                fetchProfilePicture(); // Загружаем аватарку
+            } else {
+                authSection.classList.remove('hidden');
+                appSection.classList.add('hidden');
+                todoList.innerHTML = ''; // Очищаем список при выходе
+            }
+        }
+
+        // Переключение табов
+        tabLogin.addEventListener('click', () => {
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            tabLogin.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600');
+            tabLogin.classList.remove('text-gray-500');
+            tabRegister.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600');
+            tabRegister.classList.add('text-gray-500');
+            authError.classList.add('hidden');
+        });
+
+        tabRegister.addEventListener('click', () => {
+            registerForm.classList.remove('hidden');
+            loginForm.classList.add('hidden');
+            tabRegister.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600');
+            tabRegister.classList.remove('text-gray-500');
+            tabLogin.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600');
+            tabLogin.classList.add('text-gray-500');
+            authError.classList.add('hidden');
+        });
+
+        // Логин
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(loginForm);
+            
+            try {
+                const response = await fetch(`${BASE_URL}/login`, {
+                    method: 'POST',
+                    body: formData // OAuth2PasswordRequestForm ожидает form-data
+                });
+
+                if (!response.ok) throw new Error('Invalid username or password');
+
+                const data = await response.json();
+                setToken(data.access_token);
+                loginForm.reset();
+                checkAuth();
+            } catch (error) {
+                authError.textContent = error.message;
+                authError.classList.remove('hidden');
+            }
+        });
+
+        // Регистрация
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(registerForm);
+            const jsonData = Object.fromEntries(formData.entries());
+
+            try {
+                const response = await fetch(`${BASE_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(jsonData)
+                });
+
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || 'Registration error');
+                }
+
+                alert('Registration successful! Please login.');
+                tabLogin.click();
+                registerForm.reset();
+            } catch (error) {
+                authError.textContent = error.message;
+                authError.classList.remove('hidden');
+            }
+        });
+
+        // Получение текущего пользователя
+        async function fetchCurrentUser() {
+            try {
+                const response = await authenticatedFetch(`${BASE_URL}/get_current_user`);
+                if (response.ok) {
+                    const user = await response.json();
+                    userGreeting.textContent = `Hello, ${user.username}!`;
+                    headerUsername.textContent = user.username;
+                    dropdownUsername.textContent = user.username;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // --- ФУНКЦИИ ПРОФИЛЯ ---
+
+        // Получить URL аватарки
+        async function fetchProfilePicture() {
+            try {
+                const response = await authenticatedFetch(`${BASE_URL}/get_profile_picture`);
+                if (response.ok) {
+                    const path = await response.json();
+                    if (path) {
+                        // Исправляем слеши для URL и добавляем BASE_URL, так как путь относительный
+                        // Предполагаем, что бекенд раздает статику корректно
+                        // Если путь абсолютный или начинается с http, логику нужно поменять
+                        const normalizedPath = path.replace(/\\/g, '/');
+                        // ВАЖНО: Убедитесь, что ваш FastAPI раздает папку media как статику
+                        // Обычно это делается через app.mount("/media", StaticFiles(directory="media"), name="media")
+                        const fullUrl = `${BASE_URL}/${normalizedPath}`; 
+                        
+                        // Добавляем timestamp чтобы избежать кеширования браузером при обновлении
+                        const urlWithCacheBust = `${fullUrl}?t=${new Date().getTime()}`;
+                        
+                        headerAvatar.src = urlWithCacheBust;
+                        modalAvatarPreview.src = urlWithCacheBust;
+                    }
+                }
+            } catch (e) {
+                console.error("Ошибка загрузки аватарки:", e);
+            }
+        }
+
+        // Загрузить новую аватарку
+        async function uploadAvatar() {
+            const fileInput = document.getElementById('avatar-upload');
+            if (fileInput.files.length === 0) {
+                alert("Please select a file.");
+                return;
+            }
+
+            const formData = new FormData();
+            // В ProfilePicRouter параметр называется 'data'
+            formData.append('data', fileInput.files[0]);
+
+            try {
+                const response = await authenticatedFetch(`${BASE_URL}/upload_profile_picture`, {
+                    method: 'POST',
+                    body: formData // Content-Type выставится автоматически браузером
+                });
+
+                if (!response.ok) throw new Error('Upload error');
+                
+                alert('Profile photo updated!');
+                closeProfileModal();
+                fetchProfilePicture(); // Обновляем картинку везде
+            } catch (error) {
+                console.error(error);
+                alert('Failed to upload photo. Check format (jpg/png).');
+            }
+        }
+
+        // UI Логика для профиля
+        profileBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!profileDropdown.classList.contains('hidden') && !profileBtn.contains(e.target) && !profileDropdown.contains(e.target)) {
+                profileDropdown.classList.add('hidden');
+            }
+        });
+
+        function openProfileModal() {
+            profileDropdown.classList.add('hidden');
+            profileModal.classList.remove('hidden');
+        }
+
+        function closeProfileModal() {
+            profileModal.classList.add('hidden');
+            // Сброс превью к текущему актуальному фото
+            fetchProfilePicture(); 
+            document.getElementById('avatar-upload').value = "";
+        }
+
+        function previewAvatar(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    modalAvatarPreview.src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Обертка для запросов с токеном
+        async function authenticatedFetch(url, options = {}) {
+            const token = getToken();
+            const headers = {
+                ...options.headers,
+                'Authorization': `Bearer ${token}`
+            };
+            
+            const response = await fetch(url, { ...options, headers });
+            
+            if (response.status === 401) {
+                logout(); // Если токен протух, выходим
+                throw new Error('Unauthorized');
+            }
+            return response;
+        }
+
+        // --- API ФУНКЦИИ ---
+
+        // 1. Получить все задачи
+        async function fetchTodos() {
+            showLoading(true);
+            try {
+                const response = await authenticatedFetch(`${BASE_URL}/tasks`);
+                if (!response.ok) throw new Error('Network error');
+                const todos = await response.json();
+                renderTodos(todos);
+            } catch (error) {
+                console.error('Ошибка при загрузке:', error);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // 2. Создать задачу
+        async function createTodo(title) {
+            try {
+                const response = await authenticatedFetch(`${BASE_URL}/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        task: title, 
+                        status: false
+                    }) 
+                });
+                if (!response.ok) throw new Error('Creation error');
+                await fetchTodos(); // Перезагружаем список
+                todoInput.value = '';
+            } catch (error) {
+                console.error(error);
+                alert('Error creating task');
+            }
+        }
+
+        // 3. Обновить статус (Toggle Complete)
+        async function toggleTodo(id, currentStatus, currentTitle) {
+            try {
+                // Бекенд использует query params: /set task status?task_id=...&status=...
+                // И метод POST
+                const newStatus = !currentStatus;
+                const url = `${BASE_URL}/set%20task%20status?task_id=${id}&status=${newStatus}`;
+                
+                const response = await authenticatedFetch(url, {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) throw new Error('Update error');
+                await fetchTodos();
+            } catch (error) {
+                console.error(error);
+                alert('Error updating status');
+            }
+        }
+
+        // 4. Удалить задачу
+        async function deleteTodo(id) {
+            if(!confirm('Are you sure?')) return;
+
+            try {
+                // Бекенд использует query param: /remove?task_id=...
+                const url = `${BASE_URL}/remove?task_id=${id}`;
+                const response = await authenticatedFetch(url, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) throw new Error('Deletion error');
+                await fetchTodos();
+            } catch (error) {
+                console.error(error);
+                alert('Error deleting');
+            }
+        }
+
+        // --- ОТРИСОВКА (RENDER) ---
+
+        function renderTodos(todos) {
+            todoList.innerHTML = '';
+            
+            if (!todos || todos.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            todos.forEach(todo => {
+                const id = todo.id;
+                // Схема Task имеет поле status (bool)
+                const isCompleted = todo.status;
+
+                const li = document.createElement('li');
+                li.className = `p-4 flex items-center justify-between hover:bg-gray-50 transition group ${isCompleted ? 'bg-gray-50' : ''}`;
+                
+                li.innerHTML = `
+                    <div class="flex items-center gap-3 flex-1 cursor-pointer" onclick="toggleTodo('${id}', ${isCompleted}, '${escapeHtml(todo.task)}')">
+                        <div class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition
+                            ${isCompleted ? 'bg-green-500 border-green-500' : 'border-gray-300 group-hover:border-indigo-500'}">
+                            ${isCompleted ? '<i class="fa-solid fa-check text-white text-xs"></i>' : ''}
+                        </div>
+                        <span class="text-lg ${isCompleted ? 'text-gray-400 line-through' : 'text-gray-800'}">
+                            ${escapeHtml(todo.task)}
+                        </span>
+                    </div>
+                    <button onclick="deleteTodo('${id}')" class="text-gray-400 hover:text-red-500 transition p-2">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                `;
+                todoList.appendChild(li);
+            });
+        }
+
+        // --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ---
+
+        function showLoading(isLoading) {
+            if (isLoading) {
+                loadingSpinner.classList.remove('hidden');
+                emptyState.classList.add('hidden');
+            } else {
+                loadingSpinner.classList.add('hidden');
+            }
+        }
+
+        // Защита от XSS атак
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Обработчик отправки формы
+        todoForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const title = todoInput.value.trim();
+            if (title) {
+                createTodo(title);
+            }
+        });
+
+        // Запуск при загрузке страницы
+        checkAuth();
+
+    </script>
+</body>
+</html>
