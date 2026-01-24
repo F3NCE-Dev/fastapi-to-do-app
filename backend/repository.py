@@ -5,7 +5,6 @@ from fastapi import HTTPException
 from sqlalchemy import select
 
 from config.config import DEFAULT_USER_PROFILE_PIC
-from pathlib import Path
 
 class TaskRepository:
     @classmethod

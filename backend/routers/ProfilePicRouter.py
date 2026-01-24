@@ -3,6 +3,7 @@ from fastapi import APIRouter, UploadFile, Depends, HTTPException
 from repository import ProfilePicture
 from database import UserORM
 from auth.dependencies import get_current_user
+from config.config import DEFAULT_USER_PROFILE_PIC
 
 from pathlib import Path
 import aiofiles
@@ -28,7 +29,7 @@ async def upload_profile_picture(data: UploadFile, current_user: UserORM = Depen
 
     await ProfilePicture.upload_user_profile_picture(user_id=current_user.id, path=str(file_path))
 
-    if old_path and old_path != str(file_path):
+    if old_path and old_path != str(file_path) and old_path != DEFAULT_USER_PROFILE_PIC:
         old_file = Path(old_path)
         if old_file.exists():
             old_file.unlink()

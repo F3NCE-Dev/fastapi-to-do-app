@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import uvicorn
 
 from database import setup_database
@@ -26,6 +27,9 @@ app.add_middleware(
 app.include_router(TaskHandlersRouter.router)
 app.include_router(AuthorizationRouter.router)
 app.include_router(ProfilePicRouter.router)
+
+app.mount("/media", StaticFiles(directory="media"), name="media")
+app.mount("/default_media", StaticFiles(directory="default_media"), name="default_media")
 
 if __name__ == "__main__":
     uvicorn.run("main:app")
