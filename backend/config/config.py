@@ -1,5 +1,13 @@
-SECRET_KEY = "Secret_Key"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
-DATABASE_URL = "sqlite+aiosqlite:///app.db"
-DEFAULT_USER_PROFILE_PIC="default_media/default.png"
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+class Settings(BaseSettings):
+    SECRET_KEY: str = "Secret_Key"
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+    DATABASE_URL: str = "sqlite+aiosqlite:///app.db"
+    DEFAULT_USER_PROFILE_PIC: str = "default_media/default.png"
+    PROFILE_PICTURES_PATH: str = "media/users"
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+settings = Settings()

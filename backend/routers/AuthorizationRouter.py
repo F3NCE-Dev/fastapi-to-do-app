@@ -4,7 +4,7 @@ from fastapi.security import HTTPBasic, OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from database import UserORM
-from schemas import UserLogin
+from schemas import UserLogin, User_ID
 
 from auth.dependencies import get_db, get_current_user
 from auth.security import create_access_token, hash_password, verify_password
@@ -56,7 +56,7 @@ async def login(
     }
 
 @router.get("/get_current_user")
-def get_current_user_handler(current_user: UserORM = Depends(get_current_user)):
+def get_current_user_handler(current_user: UserORM = Depends(get_current_user)) -> User_ID:
     return {
         "id": current_user.id,
         "username": current_user.username,

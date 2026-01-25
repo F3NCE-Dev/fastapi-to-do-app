@@ -4,7 +4,7 @@ from fastapi import HTTPException
 
 from sqlalchemy import select
 
-from config.config import DEFAULT_USER_PROFILE_PIC
+from config.config import settings
 
 class TaskRepository:
     @classmethod
@@ -52,7 +52,7 @@ class TaskRepository:
             task_schemas = [Task.model_validate(task_model) for task_model in task_models]
             return task_schemas
 
-class AuthorizationRepository:        
+class AuthorizationRepository:
     @classmethod
     async def get_user_by_id(cls, user_id: int) -> UserORM | None:
         async with new_session() as session:
@@ -87,4 +87,4 @@ class ProfilePicture:
             result = await session.execute(select(FileORM).where(FileORM.user_id == user_id))
             file = result.scalar_one_or_none()
 
-            return file.path if file else DEFAULT_USER_PROFILE_PIC
+            return file.path if file else settings.DEFAULT_USER_PROFILE_PIC

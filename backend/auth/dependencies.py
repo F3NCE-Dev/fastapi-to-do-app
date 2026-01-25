@@ -3,7 +3,7 @@ from fastapi import Depends, HTTPException, status
 from database import new_session, UserORM
 
 from auth.security import oauth2_scheme
-from config.config import ALGORITHM, SECRET_KEY
+from config.config import settings
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,7 +25,7 @@ async def get_current_user(
     )
 
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         username: str | None = payload.get("sub")
         if username is None:
             raise credentials_exception
