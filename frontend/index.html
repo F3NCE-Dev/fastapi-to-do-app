@@ -409,6 +409,9 @@
         function openProfileModal() {
             profileDropdown.classList.add('hidden');
             profileModal.classList.remove('hidden');
+            // Очищаем input и сбрасываем превью к текущему аватару из шапки
+            document.getElementById('avatar-upload').value = "";
+            modalAvatarPreview.src = headerAvatar.src;
         }
 
         function closeProfileModal() {
