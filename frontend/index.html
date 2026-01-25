@@ -158,6 +158,9 @@
                 <button onclick="uploadAvatar()" id="save-avatar-btn" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
                     Save changes
                 </button>
+                <button onclick="deleteAvatar()" class="w-full bg-red-50 text-red-600 py-2.5 rounded-lg font-bold hover:bg-red-100 transition">
+                    Delete photo
+                </button>
             </div>
         </div>
     </div>
@@ -363,6 +366,31 @@
             } catch (error) {
                 console.error(error);
                 alert('Failed to upload photo. Check format (jpg/png).');
+            }
+        }
+
+        // Удалить аватарку
+        async function deleteAvatar() {
+            if (!confirm("Are you sure you want to delete your profile photo?")) return;
+
+            try {
+                const response = await authenticatedFetch(`${BASE_URL}/delete_profile_picture`, {
+                    method: 'DELETE'
+                });
+
+                if (response.status === 404) {
+                    alert("No custom profile photo to delete.");
+                    return;
+                }
+
+                if (!response.ok) throw new Error('Delete error');
+                
+                alert('Profile photo deleted!');
+                closeProfileModal();
+                fetchProfilePicture(); 
+            } catch (error) {
+                console.error(error);
+                alert('Failed to delete photo.');
             }
         }
 

@@ -75,6 +75,13 @@ class ProfilePicture:
             await session.commit()
 
     @classmethod
+    async def delete_user_profile_picture(cls, user_id: int):
+        async with new_session() as session:
+            result = await session.execute(select(FileORM).where(FileORM.user_id == user_id))
+            await session.delete(result.scalar_one_or_none())
+            await session.commit()
+
+    @classmethod
     async def get_user_profile_picture_url(cls, user_id: int) -> str | None:
         async with new_session() as session:
             result = await session.execute(select(FileORM).where(FileORM.user_id == user_id))

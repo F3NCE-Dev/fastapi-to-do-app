@@ -36,6 +36,21 @@ async def upload_profile_picture(data: UploadFile, current_user: UserORM = Depen
 
     return {"detail": f"{filename} has successfully uploaded"}
 
+@router.delete("/delete_profile_picture")
+async def delete_profile_picture(current_user: UserORM = Depends(get_current_user)):
+    file_path = await ProfilePicture.get_user_profile_picture_url(current_user.id)
+
+    if not file_path or file_path == DEFAULT_USER_PROFILE_PIC:
+        raise HTTPException(404, "Profile picture not found")
+
+    await ProfilePicture.delete_user_profile_picture(current_user.id)
+    
+    file_obj = Path(file_path)
+    if file_obj.exists():
+        file_obj.unlink()
+
+    return {"detail": "Profile picture has successfully deleted"}
+
 @router.get("/get_profile_picture")
 async def get_profile_picture_url(current_user: UserORM = Depends(get_current_user)):
     path = await ProfilePicture.get_user_profile_picture_url(current_user.id)
