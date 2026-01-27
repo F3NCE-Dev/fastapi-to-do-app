@@ -1,22 +1,32 @@
 from pydantic import BaseModel, ConfigDict, Field
 
-class UserLogin(BaseModel):
-    username: str = Field(default="username", min_length=1, max_length=25, pattern=r"^[a-zA-Z0-9_-]+$")
-    password: str = Field(default=12345, min_length=5, max_length=25)
+class UserAuthData(BaseModel):
+    username: str = Field(min_length=1, max_length=25, pattern=r"^[a-zA-Z0-9_-]+$")
+    password: str = Field(min_length=5, max_length=25)
 
-class User_ID(BaseModel):
+class UserID(BaseModel):
     id: int
     username: str
 
 class TaskAdd(BaseModel):
-    task: str = Field(min_length=1, max_length=255)
-    status: bool
+    task: str = Field(default="task", min_length=1, max_length=255)
+    status: bool = False
 
 class Task(TaskAdd):
     id: int
 
     model_config = ConfigDict(from_attributes=True)
 
-class Task_ID(BaseModel):
+class StatusResponse(BaseModel):
+    success: bool
+    detail: str
+
+class TaskAddResponse(BaseModel):
     success: bool
     task_id: int
+
+class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str
+
+    model_config = ConfigDict(from_attributes=True)

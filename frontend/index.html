@@ -488,13 +488,13 @@
         // 3. Обновить статус (Toggle Complete)
         async function toggleTodo(id, currentStatus, currentTitle) {
             try {
-                // Бекенд использует query params: /set task status?task_id=...&status=...
-                // И метод POST
+                // Бекенд использует path param для id и query param для status
+                // И метод PATCH
                 const newStatus = !currentStatus;
-                const url = `${BASE_URL}/set%20task%20status?task_id=${id}&status=${newStatus}`;
+                const url = `${BASE_URL}/set-task-status/${id}?status=${newStatus}`;
                 
                 const response = await authenticatedFetch(url, {
-                    method: 'POST'
+                    method: 'PATCH'
                 });
                 
                 if (!response.ok) throw new Error('Update error');
@@ -510,8 +510,8 @@
             if(!confirm('Are you sure?')) return;
 
             try {
-                // Бекенд использует query param: /remove?task_id=...
-                const url = `${BASE_URL}/remove?task_id=${id}`;
+                // Бекенд использует path param: /remove/{task_id}
+                const url = `${BASE_URL}/remove/${id}`;
                 const response = await authenticatedFetch(url, {
                     method: 'DELETE'
                 });

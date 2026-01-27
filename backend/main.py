@@ -3,10 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
-from database import setup_database
-
 from contextlib import asynccontextmanager
 
+from database import setup_database
 from routers import AuthorizationRouter, ProfilePicRouter, TaskHandlersRouter
 
 @asynccontextmanager
