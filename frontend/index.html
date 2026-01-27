@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="eu">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -143,24 +143,36 @@
                 <button onclick="closeProfileModal()" class="hover:text-gray-200 focus:outline-none"><i class="fa-solid fa-times text-xl"></i></button>
             </div>
             
-            <div class="p-6 flex flex-col items-center gap-5">
-                <!-- Загрузка фото -->
-                <div class="relative group cursor-pointer" onclick="document.getElementById('avatar-upload').click()">
-                    <img id="modal-avatar-preview" src="https://via.placeholder.com/150" class="w-32 h-32 rounded-full object-cover border-4 border-indigo-100 shadow-md bg-gray-200">
-                    <div class="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
-                        <i class="fa-solid fa-camera text-white text-3xl"></i>
+            <div class="p-6 space-y-6">
+                <!-- Смена имени -->
+                <div class="space-y-2">
+                    <label for="rename-input" class="block text-sm font-bold text-gray-700">Username</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="rename-input" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <button onclick="renameProfile()" class="bg-indigo-600 text-white px-5 rounded-lg font-bold hover:bg-indigo-700 transition">Save</button>
+                    </div>
+                    <p id="rename-error" class="text-red-500 text-xs text-center pt-1 hidden"></p>
+                </div>
+
+                <!-- Смена аватара -->
+                <div class="border-t border-gray-200 pt-6 space-y-4 flex flex-col items-center">
+                    <div class="relative group cursor-pointer" onclick="document.getElementById('avatar-upload').click()">
+                        <img id="modal-avatar-preview" src="https://via.placeholder.com/150" class="w-32 h-32 rounded-full object-cover border-4 border-indigo-100 shadow-md bg-gray-200">
+                        <div class="absolute inset-0 bg-black bg-opacity-40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200">
+                            <i class="fa-solid fa-camera text-white text-3xl"></i>
+                        </div>
+                    </div>
+                    <input type="file" id="avatar-upload" class="hidden" accept="image/png, image/jpeg" onchange="previewAvatar(this)">
+                    
+                    <div class="w-full flex gap-2">
+                        <button onclick="uploadAvatar()" class="flex-1 bg-indigo-500 text-white py-2.5 rounded-lg font-bold hover:bg-indigo-600 transition">
+                            Upload Photo
+                        </button>
+                        <button onclick="deleteAvatar()" class="flex-1 bg-red-50 text-red-600 py-2.5 rounded-lg font-bold hover:bg-red-100 transition">
+                            Delete Photo
+                        </button>
                     </div>
                 </div>
-                <p class="text-xs text-gray-400 text-center">Click on photo to change<br>(JPG, PNG)</p>
-                
-                <input type="file" id="avatar-upload" class="hidden" accept="image/png, image/jpeg" onchange="previewAvatar(this)">
-                
-                <button onclick="uploadAvatar()" id="save-avatar-btn" class="w-full bg-indigo-600 text-white py-2.5 rounded-lg font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200">
-                    Save changes
-                </button>
-                <button onclick="deleteAvatar()" class="w-full bg-red-50 text-red-600 py-2.5 rounded-lg font-bold hover:bg-red-100 transition">
-                    Delete photo
-                </button>
             </div>
         </div>
     </div>
@@ -187,6 +199,8 @@
         const dropdownUsername = document.getElementById('dropdown-username');
         const headerAvatar = document.getElementById('header-avatar');
         const modalAvatarPreview = document.getElementById('modal-avatar-preview');
+        const renameInput = document.getElementById('rename-input');
+        const renameError = document.getElementById('rename-error');
 
         // Элементы Todo
         const todoForm = document.getElementById('todo-form');
@@ -394,6 +408,44 @@
             }
         }
 
+        // Переименовать профиль
+        async function renameProfile() {
+            const newName = renameInput.value.trim();
+            const currentName = dropdownUsername.textContent;
+
+            renameError.classList.add('hidden');
+            if (!newName) {
+                renameError.textContent = "Username cannot be empty.";
+                renameError.classList.remove('hidden');
+                return;
+            }
+            if (newName === currentName) {
+                return; // Имя не изменилось, ничего не делаем
+            }
+
+            try {
+                const response = await authenticatedFetch(`${BASE_URL}/rename_profile`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ new_name: newName })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Failed to rename profile.');
+                }
+
+                setToken(data.access_token); // <-- Ключевой момент: обновляем токен
+                await fetchCurrentUser(); // <-- Обновляем имя в интерфейсе
+                alert('Username updated successfully!');
+                closeProfileModal();
+            } catch (error) {
+                renameError.textContent = error.message;
+                renameError.classList.remove('hidden');
+            }
+        }
+
         // UI Логика для профиля
         profileBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -412,12 +464,14 @@
             // Очищаем input и сбрасываем превью к текущему аватару из шапки
             document.getElementById('avatar-upload').value = "";
             modalAvatarPreview.src = headerAvatar.src;
+            // Заполняем поле текущим именем
+            renameInput.value = dropdownUsername.textContent;
+            renameError.classList.add('hidden');
         }
 
         function closeProfileModal() {
             profileModal.classList.add('hidden');
             // Сброс превью к текущему актуальному фото
-            fetchProfilePicture(); 
             document.getElementById('avatar-upload').value = "";
         }
 

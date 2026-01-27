@@ -1,7 +1,7 @@
 from fastapi import HTTPException, UploadFile, status
 
 from database import TaskORM, UserORM, FileORM
-from schemas import TaskAdd, Task, UserAuthData
+from schemas import TaskAdd, Task, UserAuthData, UserID
 from auth.security import create_access_token, hash_password, verify_password
 from config.config import settings
 
@@ -82,20 +82,44 @@ class AuthorizationRepository:
 
         return create_access_token({"sub": user.username})
 
-class ProfilePicture:
     @classmethod
-    async def upload_user_profile_picture(cls, data: UploadFile, username: str, user_id: int, db: AsyncSession) -> str:
+    async def get_user(cls, data: UserID) -> UserID:
+        return UserID(
+            id=data.id,
+            username=data.username,
+        )
+
+class ProfileEditRepository:
+    @classmethod
+    async def rename_user_profile(cls, new_name: str, user_id: int, db: AsyncSession) -> str:
+        result_existing = await db.execute(select(UserORM).where(UserORM.username == new_name))
+        if result_existing.scalar_one_or_none():
+            raise HTTPException(status_code=400, detail="Username already exists")
+
+        result = await db.execute(select(UserORM).where(UserORM.id == user_id))
+        user = result.scalar_one_or_none()
+
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        user.username = new_name
+        await db.commit()
+
+        return create_access_token({"sub": new_name})
+
+    @classmethod
+    async def upload_user_profile_picture(cls, data: UploadFile, user_id: int, db: AsyncSession) -> str:
         if data.content_type not in ("image/jpeg", "image/png"):
             raise HTTPException(400, "Invalid image type")
 
         filename = Path(data.filename).name
 
-        user_dir = Path(settings.PROFILE_PICTURES_PATH) / username
+        user_dir = Path(settings.PROFILE_PICTURES_PATH) / str(user_id)
         user_dir.mkdir(parents=True, exist_ok=True)
 
         file_path = user_dir / filename
 
-        old_path = await ProfilePicture.get_user_profile_picture_url(user_id, db)
+        old_path = await ProfileEditRepository.get_user_profile_picture_url(user_id, db)
 
         async with aiofiles.open(file_path, "wb") as file:
             await file.write(await data.read())
@@ -119,7 +143,7 @@ class ProfilePicture:
 
     @classmethod
     async def delete_user_profile_picture(cls, user_id: int, db: AsyncSession) -> None:
-        file_path = await ProfilePicture.get_user_profile_picture_url(user_id, db)
+        file_path = await ProfileEditRepository.get_user_profile_picture_url(user_id, db)
 
         if not file_path or file_path == settings.DEFAULT_USER_PROFILE_PIC:
             raise HTTPException(404, "Profile picture not found")

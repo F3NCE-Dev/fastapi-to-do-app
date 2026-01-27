@@ -25,8 +25,5 @@ async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: 
     return {"access_token": token, "token_type": "bearer"}
 
 @router.get("/get_current_user", response_model=UserID)
-def get_current_user_handler(current_user: CurrentUser):
-    return {
-        "id": current_user.id,
-        "username": current_user.username,
-    }
+async def get_current_user_handler(current_user: CurrentUser):
+    return await AuthorizationRepository.get_user(current_user)
