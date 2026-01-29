@@ -10,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from pathlib import Path
 import aiofiles
+import re
+import secrets
 
 class TaskRepository:
     @classmethod
@@ -88,6 +90,36 @@ class AuthorizationRepository:
             id=data.id,
             username=data.username,
         )
+
+    @classmethod
+    async def oauth_login_register(cls, email: str, name: str, db: AsyncSession) -> str:
+        result = await db.execute(select(UserORM).where(UserORM.email == email))
+        user = result.scalar_one_or_none()
+
+        if user:
+            return create_access_token({"sub": user.username})
+
+        base_name = name if name else email.split("@")[0]
+        clean_name = re.sub(r'[^a-zA-Z0-9_-]', '', base_name)
+        if not clean_name:
+            clean_name = "user"
+
+        username = clean_name
+        counter = 1
+        
+        while True:
+            res = await db.execute(select(UserORM).where(UserORM.username == username))
+            if not res.scalar_one_or_none():
+                break
+            username = f"{clean_name}{counter}"
+            counter += 1
+
+        random_password = secrets.token_urlsafe(16)
+        user = UserORM(username=username, password=hash_password(random_password), email=email)
+        db.add(user)
+        await db.commit()
+
+        return create_access_token({"sub": user.username})
 
 class ProfileEditRepository:
     @classmethod

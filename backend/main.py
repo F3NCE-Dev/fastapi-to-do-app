@@ -6,7 +6,7 @@ import uvicorn
 from contextlib import asynccontextmanager
 
 from database import setup_database
-from routers import AuthorizationRouter, TaskHandlersRouter, ProfileEditRouter
+from routers import AuthorizationRouter, TaskHandlersRouter, ProfileEditRouter, OAuthAuthorizationRouter
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,6 +25,7 @@ app.add_middleware(
 
 app.include_router(TaskHandlersRouter.router)
 app.include_router(AuthorizationRouter.router)
+app.include_router(OAuthAuthorizationRouter.router)
 app.include_router(ProfileEditRouter.router)
 
 app.mount("/media", StaticFiles(directory="media"), name="media")

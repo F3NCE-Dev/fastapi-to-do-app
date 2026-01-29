@@ -1,5 +1,5 @@
 venv
 __pycache__
 app.db
-media
+media/users
 .env

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="eu">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -48,6 +48,17 @@
                     <input type="password" name="password" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
                 </div>
                 <button type="submit" class="w-full bg-indigo-600 text-white p-3 rounded-lg font-bold hover:bg-indigo-700 transition">Login</button>
+                
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-gray-300"></div>
+                    <span class="flex-shrink-0 mx-4 text-gray-400 text-sm">Or</span>
+                    <div class="flex-grow border-t border-gray-300"></div>
+                </div>
+
+                <a href="http://localhost:8000/google/url" class="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 p-3 rounded-lg font-bold hover:bg-gray-50 transition">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
+                    Login with Google
+                </a>
             </form>
 
             <!-- Форма Регистрации (скрыта) -->
@@ -232,10 +243,44 @@
                 fetchTodos(); // Загружаем задачи
                 fetchCurrentUser(); // Загружаем имя пользователя
                 fetchProfilePicture(); // Загружаем аватарку
+                checkUrlForOAuth(); // Проверяем, не вернулись ли мы с Google
             } else {
                 authSection.classList.remove('hidden');
                 appSection.classList.add('hidden');
                 todoList.innerHTML = ''; // Очищаем список при выходе
+            }
+        }
+
+        // Обработка возврата с Google
+        async function checkUrlForOAuth() {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+
+            if (code) {
+                // Очищаем URL чтобы код не висел
+                window.history.replaceState({}, document.title, window.location.pathname);
+                
+                // Показываем лоадер или блокируем интерфейс пока идет обмен кода
+                authSection.classList.add('opacity-50', 'pointer-events-none');
+
+                try {
+                    const response = await fetch(`${BASE_URL}/google/callback`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ code: code })
+                    });
+
+                    if (!response.ok) throw new Error('Google login failed');
+
+                    const data = await response.json();
+                    setToken(data.access_token);
+                    checkAuth(); // Перезагружаем состояние
+                } catch (error) {
+                    authError.textContent = error.message;
+                    authError.classList.remove('hidden');
+                } finally {
+                    authSection.classList.remove('opacity-50', 'pointer-events-none');
+                }
             }
         }
 
@@ -649,6 +694,7 @@
 
         // Запуск при загрузке страницы
         checkAuth();
+        if (!getToken()) checkUrlForOAuth(); // Если токена нет, проверяем URL на наличие кода
 
     </script>
 </body>

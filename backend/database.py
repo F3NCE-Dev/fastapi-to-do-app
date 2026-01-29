@@ -18,6 +18,8 @@ class UserORM(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
+    
+    email: Mapped[str | None] = mapped_column(unique=True, index=True, nullable=True)
 
     tasks: Mapped[list["TaskORM"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
