@@ -20,6 +20,7 @@ class UserORM(Base):
     password: Mapped[str] = mapped_column(nullable=False)
     
     email: Mapped[str | None] = mapped_column(unique=True, index=True, nullable=True)
+    github_id: Mapped[int | None] = mapped_column(unique=True, index=True, nullable=True)
 
     tasks: Mapped[list["TaskORM"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 

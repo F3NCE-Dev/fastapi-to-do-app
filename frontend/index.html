@@ -55,9 +55,14 @@
                     <div class="flex-grow border-t border-gray-300"></div>
                 </div>
 
-                <a href="http://localhost:8000/google/url" class="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 p-3 rounded-lg font-bold hover:bg-gray-50 transition">
+                <a href="http://localhost:8000/google/url" onclick="setAuthProvider('google')" class="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 p-3 rounded-lg font-bold hover:bg-gray-50 transition">
                     <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
                     Login with Google
+                </a>
+
+                <a href="http://localhost:8000/github/url" onclick="setAuthProvider('github')" class="w-full flex items-center justify-center gap-2 bg-gray-900 text-white p-3 rounded-lg font-bold hover:bg-gray-800 transition mt-2">
+                    <i class="fa-brands fa-github text-xl"></i>
+                    Login with GitHub
                 </a>
             </form>
 
@@ -251,6 +256,10 @@
             }
         }
 
+        function setAuthProvider(provider) {
+            sessionStorage.setItem('auth_provider', provider);
+        }
+
         // Обработка возврата с Google
         async function checkUrlForOAuth() {
             const params = new URLSearchParams(window.location.search);
@@ -263,8 +272,18 @@
                 // Показываем лоадер или блокируем интерфейс пока идет обмен кода
                 authSection.classList.add('opacity-50', 'pointer-events-none');
 
+                let provider = sessionStorage.getItem('auth_provider');
+
+                // Fallback: Detect provider from URL params if sessionStorage failed (e.g. domain mismatch)
+                if (!provider) {
+                    // Google always returns 'scope' parameter, GitHub does not
+                    provider = params.has('scope') ? 'google' : 'github';
+                }
+
+                const endpoint = provider === 'github' ? '/github/callback' : '/google/callback';
+
                 try {
-                    const response = await fetch(`${BASE_URL}/google/callback`, {
+                    const response = await fetch(`${BASE_URL}${endpoint}`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ code: code })
@@ -274,7 +293,7 @@
 
                     const data = await response.json();
                     setToken(data.access_token);
-                    checkAuth(); // Перезагружаем состояние
+                    window.location.href = window.location.pathname; // Clean URL and reload state
                 } catch (error) {
                     authError.textContent = error.message;
                     authError.classList.remove('hidden');
@@ -358,7 +377,7 @@
         // Получение текущего пользователя
         async function fetchCurrentUser() {
             try {
-                const response = await authenticatedFetch(`${BASE_URL}/get_current_user`);
+                const response = await authenticatedFetch(`${BASE_URL}/user`);
                 if (response.ok) {
                     const user = await response.json();
                     userGreeting.textContent = `Hello, ${user.username}!`;
@@ -375,7 +394,7 @@
         // Получить URL аватарки
         async function fetchProfilePicture() {
             try {
-                const response = await authenticatedFetch(`${BASE_URL}/get_profile_picture`);
+                const response = await authenticatedFetch(`${BASE_URL}/get-profile-picture`);
                 if (response.ok) {
                     const path = await response.json();
                     if (path) {
@@ -412,7 +431,7 @@
             formData.append('data', fileInput.files[0]);
 
             try {
-                const response = await authenticatedFetch(`${BASE_URL}/upload_profile_picture`, {
+                const response = await authenticatedFetch(`${BASE_URL}/upload-profile-picture`, {
                     method: 'POST',
                     body: formData // Content-Type выставится автоматически браузером
                 });
@@ -433,7 +452,7 @@
             if (!confirm("Are you sure you want to delete your profile photo?")) return;
 
             try {
-                const response = await authenticatedFetch(`${BASE_URL}/delete_profile_picture`, {
+                const response = await authenticatedFetch(`${BASE_URL}/delete-profile-picture`, {
                     method: 'DELETE'
                 });
 
@@ -469,7 +488,7 @@
             }
 
             try {
-                const response = await authenticatedFetch(`${BASE_URL}/rename_profile`, {
+                const response = await authenticatedFetch(`${BASE_URL}/rename-profile`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ new_name: newName })

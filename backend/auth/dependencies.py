@@ -8,7 +8,7 @@ from config.config import settings
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Annotated
-from jose import jwt, JWTError
+import jwt
 
 async def get_db():
     async with new_session() as session:
@@ -29,7 +29,7 @@ async def get_current_user(
         username: str | None = payload.get("sub")
         if username is None:
             raise credentials_exception
-    except JWTError:
+    except jwt.PyJWTError:
         raise credentials_exception
 
     result = await db.execute(select(UserORM).where(UserORM.username == username))
