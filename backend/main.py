@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-import uvicorn
 
 from pathlib import Path
 from contextlib import asynccontextmanager
@@ -35,6 +34,3 @@ Path(settings.DEFAULT_USER_PROFILE_PIC_DIR).mkdir(parents=True, exist_ok=True)
 
 app.mount("/media", StaticFiles(directory=settings.MEDIA_DIR), name="media")
 app.mount("/default_media", StaticFiles(directory=settings.DEFAULT_USER_PROFILE_PIC_DIR), name="default_media")
-
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000)
