@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import uvicorn
 
+from pathlib import Path
 from contextlib import asynccontextmanager
 from config.config import settings
 
@@ -18,7 +19,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.FRONTEND_URL, "http://127.0.0.1:5500"],
+    allow_origins=[settings.FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,8 +30,11 @@ app.include_router(AuthorizationRouter.router)
 app.include_router(OAuthAuthorizationRouter.router)
 app.include_router(ProfileEditRouter.router)
 
-app.mount("/media", StaticFiles(directory="media"), name="media")
-app.mount("/default_media", StaticFiles(directory="default_media"), name="default_media")
+Path(settings.MEDIA_DIR).mkdir(parents=True, exist_ok=True)
+Path(settings.DEFAULT_USER_PROFILE_PIC_DIR).mkdir(parents=True, exist_ok=True)
+
+app.mount("/media", StaticFiles(directory=settings.MEDIA_DIR), name="media")
+app.mount("/default_media", StaticFiles(directory=settings.DEFAULT_USER_PROFILE_PIC_DIR), name="default_media")
 
 if __name__ == "__main__":
-    uvicorn.run("main:app")
+    uvicorn.run("main:app", host="0.0.0.0", port=8000)

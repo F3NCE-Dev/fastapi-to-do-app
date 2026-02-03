@@ -109,7 +109,7 @@ class AuthorizationRepository:
                 raise HTTPException(status_code=400, detail=res.get("error_description", "OAuth error"))
 
             id_token = res["id_token"]
-            user_data = jwt.decode(id_token, algorithms=["RS256"], options={"verify_signature": False})
+            user_data = jwt.decode(id_token, algorithms=["RS256"], options={"verify_signature": settings.DEBUG_MODE})
             
             email = user_data.get("email")
             name = user_data.get("name") or user_data.get("given_name")
@@ -222,7 +222,7 @@ class ProfileEditRepository:
 
         filename = Path(data.filename).name
 
-        user_dir = Path(settings.PROFILE_PICTURES_PATH) / str(user_id)
+        user_dir = settings.PROFILE_PICTURES_PATH / str(user_id)
         user_dir.mkdir(parents=True, exist_ok=True)
 
         file_path = user_dir / filename
@@ -232,7 +232,7 @@ class ProfileEditRepository:
         async with aiofiles.open(file_path, "wb") as file:
             await file.write(await data.read())
 
-        if old_path and old_path != str(file_path) and old_path != settings.DEFAULT_USER_PROFILE_PIC:
+        if old_path and old_path != str(file_path) and old_path != settings.DEFAULT_USER_PROFILE_PIC_URL:
             old_file = Path(old_path)
             if old_file.exists():
                 old_file.unlink()
@@ -253,7 +253,7 @@ class ProfileEditRepository:
     async def delete_user_profile_picture(cls, user_id: int, db: AsyncSession) -> None:
         file_path = await ProfileEditRepository.get_user_profile_picture_url(user_id, db)
 
-        if not file_path or file_path == settings.DEFAULT_USER_PROFILE_PIC:
+        if not file_path or file_path == settings.DEFAULT_USER_PROFILE_PIC_URL:
             raise HTTPException(404, "Profile picture not found")
         
         file_obj = Path(file_path)
@@ -269,4 +269,4 @@ class ProfileEditRepository:
         result = await db.execute(select(FileORM).where(FileORM.user_id == user_id))
         file = result.scalar_one_or_none()
 
-        return file.path if file else settings.DEFAULT_USER_PROFILE_PIC
+        return file.path if file else settings.DEFAULT_USER_PROFILE_PIC_URL
