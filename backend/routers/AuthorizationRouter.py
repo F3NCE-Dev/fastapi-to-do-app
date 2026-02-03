@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from schemas import UserAuthData, UserID, StatusResponse, LoginResponse
 from repository import AuthorizationRepository
-from auth.dependencies import DBSession, CurrentUser
+from dependencies import DBSession, CurrentUser
 
 from typing import Annotated
 

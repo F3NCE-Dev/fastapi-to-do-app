@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from repository import TaskRepository
-from auth.dependencies import CurrentUser, DBSession
+from dependencies import CurrentUser, DBSession
 from schemas import Task, TaskAdd, StatusResponse, TaskAddResponse
 
 router = APIRouter(tags=["Task Handlers"])

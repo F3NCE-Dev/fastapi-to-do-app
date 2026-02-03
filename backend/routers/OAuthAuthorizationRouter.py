@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Body
 from fastapi.responses import RedirectResponse
 
-from config.config import settings
-from auth.dependencies import DBSession
+from dependencies import DBSession
 from auth.OAuthDependencies import generate_google_oauth_uri, generate_github_oauth_uri
 from repository import AuthorizationRepository
 from schemas import LoginResponse

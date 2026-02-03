@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile
 
 from repository import ProfileEditRepository
-from auth.dependencies import CurrentUser, DBSession
+from dependencies import CurrentUser, DBSession
 from schemas import StatusResponse, UserNewName, LoginResponse
 
 router = APIRouter(tags=["Profile Edit"])
