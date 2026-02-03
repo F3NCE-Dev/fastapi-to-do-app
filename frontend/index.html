@@ -402,9 +402,10 @@
                         // Предполагаем, что бекенд раздает статику корректно
                         // Если путь абсолютный или начинается с http, логику нужно поменять
                         const normalizedPath = path.replace(/\\/g, '/');
-                        // ВАЖНО: Убедитесь, что ваш FastAPI раздает папку media как статику
-                        // Обычно это делается через app.mount("/media", StaticFiles(directory="media"), name="media")
-                        const fullUrl = `${BASE_URL}/${normalizedPath}`; 
+                        // The backend returns a filesystem-like path (e.g., "backend/media/users/1/avatar.png").
+                        // We must remove the "backend/" prefix to construct a valid URL path for the browser.
+                        const urlPath = normalizedPath.replace('backend/', '');
+                        const fullUrl = `${BASE_URL}/${urlPath}`;
                         
                         // Добавляем timestamp чтобы избежать кеширования браузером при обновлении
                         const urlWithCacheBust = `${fullUrl}?t=${new Date().getTime()}`;

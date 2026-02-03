@@ -232,7 +232,7 @@ class ProfileEditRepository:
         async with aiofiles.open(file_path, "wb") as file:
             await file.write(await data.read())
 
-        if old_path and old_path != str(file_path) and old_path != settings.DEFAULT_USER_PROFILE_PIC_URL:
+        if old_path and old_path != file_path.as_posix() and old_path != settings.DEFAULT_USER_PROFILE_PIC_URL:
             old_file = Path(old_path)
             if old_file.exists():
                 old_file.unlink()

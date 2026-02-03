@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     DEFAULT_USER_PROFILE_PIC_IMAGE: str = "default.png"
     MEDIA_DIR: str = "backend/media"
     
-    FRONTEND_URL: str = "http://localhost:5500"
+    FRONTEND_ORIGINS: list[str] = ["http://localhost:5500", "http://127.0.0.1:5500"]
     REDIRECT_URI: str = "http://localhost:5500/frontend/index.html"
     
     OAUTH_GOOGLE_CLIENT_ID: str = "google_client_id"
