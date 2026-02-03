@@ -6,11 +6,11 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-    DATABASE_URL: str = "sqlite+aiosqlite:///app.db"
+    DATABASE_URL: str = "sqlite+aiosqlite:///backend/app.db"
 
-    DEFAULT_USER_PROFILE_PIC_DIR: str = "default_media"
+    DEFAULT_USER_PROFILE_PIC_DIR: str = "backend/default_media"
     DEFAULT_USER_PROFILE_PIC_IMAGE: str = "default.png"
-    MEDIA_DIR: str = "media"
+    MEDIA_DIR: str = "backend/media"
     
     FRONTEND_URL: str = "http://localhost:5500"
     REDIRECT_URI: str = "http://localhost:5500/frontend/index.html"

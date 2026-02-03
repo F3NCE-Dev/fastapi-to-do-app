@@ -2,7 +2,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from pathlib import Path
 from contextlib import asynccontextmanager
 from config.config import settings
 
@@ -29,8 +28,5 @@ app.include_router(AuthorizationRouter.router)
 app.include_router(OAuthAuthorizationRouter.router)
 app.include_router(ProfileEditRouter.router)
 
-Path(settings.MEDIA_DIR).mkdir(parents=True, exist_ok=True)
-Path(settings.DEFAULT_USER_PROFILE_PIC_DIR).mkdir(parents=True, exist_ok=True)
-
-app.mount("/media", StaticFiles(directory=settings.MEDIA_DIR), name="media")
-app.mount("/default_media", StaticFiles(directory=settings.DEFAULT_USER_PROFILE_PIC_DIR), name="default_media")
+app.mount("/media", StaticFiles(directory=settings.MEDIA_DIR, check_dir=False), name="media")
+app.mount("/default_media", StaticFiles(directory=settings.DEFAULT_USER_PROFILE_PIC_DIR, check_dir=False), name="default_media")
