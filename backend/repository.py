@@ -109,7 +109,7 @@ class AuthorizationRepository:
                 raise HTTPException(status_code=400, detail=res.get("error_description", "OAuth error"))
 
             id_token = res["id_token"]
-            user_data = jwt.decode(id_token, algorithms=["RS256"], options={"verify_signature": settings.DEBUG_MODE})
+            user_data = jwt.decode(id_token, algorithms=["RS256"], options={"verify_signature": not settings.DEBUG_MODE})
             
             email = user_data.get("email")
             name = user_data.get("name") or user_data.get("given_name")
