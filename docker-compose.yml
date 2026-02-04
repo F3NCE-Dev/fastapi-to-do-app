@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=sqlite+aiosqlite:///app.db
+      - MEDIA_DIR=media
+      - DEFAULT_USER_PROFILE_PIC_DIR=default_media
+    volumes:
+      - ./backend/media:/app/media
+      - ./backend/default_media:/app/default_media
+      - ./backend/app.db:/app/app.db
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5500:80"
