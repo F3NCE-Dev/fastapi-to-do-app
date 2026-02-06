@@ -3,7 +3,8 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from config.config import settings
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, DateTime, func
+from datetime import datetime
 
 engine = create_async_engine(settings.DATABASE_URL)
 
@@ -26,6 +27,9 @@ class UserORM(Base):
 
     files = relationship("FileORM", back_populates="user", cascade="all, delete-orphan")
 
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
 class TaskORM(Base):
     __tablename__ = "Tasks"
 
@@ -36,6 +40,9 @@ class TaskORM(Base):
     user_id: Mapped[int] = mapped_column (ForeignKey("users.id"), nullable=False)
     user: Mapped["UserORM"] = relationship(back_populates="tasks")
 
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
 class FileORM(Base):
     __tablename__ = "Files"
 
@@ -45,6 +52,9 @@ class FileORM(Base):
     path: Mapped[str] = mapped_column(nullable=False)
 
     user = relationship("UserORM", back_populates="files")
+
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
 async def setup_database():
     async with engine.connect() as conn:
