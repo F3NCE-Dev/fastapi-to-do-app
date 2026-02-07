@@ -5,6 +5,7 @@ from config.config import settings
 
 from sqlalchemy import ForeignKey, DateTime, func
 from datetime import datetime
+from typing import Annotated
 
 engine = create_async_engine(settings.DATABASE_URL)
 
@@ -12,6 +13,9 @@ new_session = async_sessionmaker(engine, expire_on_commit=False)
 
 class Base(DeclarativeBase):
     pass
+
+created_at = Annotated[datetime, mapped_column(DateTime(timezone=True), server_default=func.now())]
+updated_at = Annotated[datetime, mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())]
 
 class UserORM(Base):
     __tablename__ = "users"
@@ -27,8 +31,8 @@ class UserORM(Base):
 
     files = relationship("FileORM", back_populates="user", cascade="all, delete-orphan")
 
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[created_at]
+    updated_at: Mapped[updated_at]
 
 class TaskORM(Base):
     __tablename__ = "Tasks"
@@ -40,8 +44,8 @@ class TaskORM(Base):
     user_id: Mapped[int] = mapped_column (ForeignKey("users.id"), nullable=False)
     user: Mapped["UserORM"] = relationship(back_populates="tasks")
 
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[created_at]
+    updated_at: Mapped[updated_at]
 
 class FileORM(Base):
     __tablename__ = "Files"
@@ -53,8 +57,8 @@ class FileORM(Base):
 
     user = relationship("UserORM", back_populates="files")
 
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[created_at]
+    updated_at: Mapped[updated_at]
 
 async def setup_database():
     async with engine.connect() as conn:
