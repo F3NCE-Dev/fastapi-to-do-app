@@ -11,16 +11,18 @@ engine = create_async_engine(settings.DATABASE_URL)
 
 new_session = async_sessionmaker(engine, expire_on_commit=False)
 
-class Base(DeclarativeBase):
-    pass
+intpk = Annotated[int, mapped_column(primary_key=True)]
 
 created_at = Annotated[datetime, mapped_column(DateTime(timezone=True), server_default=func.now())]
 updated_at = Annotated[datetime, mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())]
 
+class Base(DeclarativeBase):
+    pass
+
 class UserORM(Base):
     __tablename__ = "users"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[intpk]
     username: Mapped[str] = mapped_column(unique=True, index=True, nullable=False)
     password: Mapped[str] = mapped_column(nullable=False)
     
@@ -29,33 +31,33 @@ class UserORM(Base):
 
     tasks: Mapped[list["TaskORM"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
-    files = relationship("FileORM", back_populates="user", cascade="all, delete-orphan")
+    files: Mapped[list["FileORM"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
     created_at: Mapped[created_at]
     updated_at: Mapped[updated_at]
 
 class TaskORM(Base):
-    __tablename__ = "Tasks"
+    __tablename__ = "tasks"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[intpk]
     task: Mapped[str] = mapped_column(nullable=False)
     status: Mapped[bool] = mapped_column(default=False)
 
-    user_id: Mapped[int] = mapped_column (ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     user: Mapped["UserORM"] = relationship(back_populates="tasks")
 
     created_at: Mapped[created_at]
     updated_at: Mapped[updated_at]
 
 class FileORM(Base):
-    __tablename__ = "Files"
+    __tablename__ = "files"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    id: Mapped[intpk]
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
 
     path: Mapped[str] = mapped_column(nullable=False)
 
-    user = relationship("UserORM", back_populates="files")
+    user: Mapped["UserORM"] = relationship(back_populates="files")
 
     created_at: Mapped[created_at]
     updated_at: Mapped[updated_at]
