@@ -6,7 +6,8 @@ from contextlib import asynccontextmanager
 from config.config import settings
 
 from database import setup_database
-from routers import AuthorizationRouter, TaskHandlersRouter, ProfileEditRouter, OAuthAuthorizationRouter
+
+from routers import task, auth, oauth, profile
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -23,10 +24,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(TaskHandlersRouter.router)
-app.include_router(AuthorizationRouter.router)
-app.include_router(OAuthAuthorizationRouter.router)
-app.include_router(ProfileEditRouter.router)
+app.include_router(task.router)
+app.include_router(auth.router)
+app.include_router(oauth.router)
+app.include_router(profile.router)
 
-app.mount("/media", StaticFiles(directory=settings.MEDIA_DIR, check_dir=False), name="media")
-app.mount("/default_media", StaticFiles(directory=settings.DEFAULT_USER_PROFILE_PIC_DIR, check_dir=False), name="default_media")
+app.mount("/static", StaticFiles(directory=settings.STATIC_DIR, check_dir=False), name="static")

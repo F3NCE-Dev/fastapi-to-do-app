@@ -63,13 +63,13 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 
 DATABASE_URL="sqlite+aiosqlite:///backend/app.db"
 
-DEFAULT_USER_PROFILE_PIC_DIR="backend/default_media"
-DEFAULT_USER_PROFILE_PIC_IMAGE="default.png"
-MEDIA_DIR="backend/media"
-    
+DEFAULT_USER_PROFILE_PIC_PATH="backend/static/default_media/default.png"
+PROFILE_PICTURES_FOLDER_NAME="profile_pictures"
+STATIC_DIR="backend/static"
+
 FRONTEND_ORIGINS=["http://localhost:5500", "http://127.0.0.1:5500"]
 REDIRECT_URI="http://localhost:5500/frontend/index.html"
-    
+
 OAUTH_GOOGLE_CLIENT_ID="google_client_id"
 OAUTH_GOOGLE_CLIENT_SECRET="google_client_secret"
 

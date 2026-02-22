@@ -7,9 +7,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p media default_media
+RUN mkdir -p static
 
-RUN chmod -R 755 media default_media
+RUN chmod -R 755 static
 
 EXPOSE 8000
 

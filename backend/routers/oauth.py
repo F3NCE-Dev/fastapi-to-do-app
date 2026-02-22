@@ -3,8 +3,8 @@ from fastapi.responses import RedirectResponse
 
 from dependencies import DBSession
 from auth.OAuthDependencies import generate_google_oauth_uri, generate_github_oauth_uri
-from repository import AuthorizationRepository
-from schemas import LoginResponse
+from services.oauth import OAuthRepository
+from schemas.response import LoginResponse
 
 from typing import Annotated
 
@@ -16,7 +16,7 @@ def get_google_oauth_url():
 
 @router.post("/google/callback", response_model=LoginResponse)
 async def handle_code(code: Annotated[str, Body(embed=True)], db: DBSession):
-    token = await AuthorizationRepository.oauth_google_login_register(code, db)
+    token = await OAuthRepository.oauth_google_login_register(code, db)
     return {"access_token": token, "token_type": "bearer"}
 
 @router.get("/github/url", response_class=RedirectResponse)
@@ -25,5 +25,5 @@ def github_login():
 
 @router.post("/github/callback", response_model=LoginResponse)
 async def github_handle_code(code: Annotated[str, Body(embed=True)], db: DBSession):
-    token = await AuthorizationRepository.github_login_register(code, db)
+    token = await OAuthRepository.github_login_register(code, db)
     return {"access_token": token, "token_type": "bearer"}

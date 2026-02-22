@@ -9,11 +9,11 @@ services:
       - .env
     environment:
       - DATABASE_URL=sqlite+aiosqlite:///app.db
-      - MEDIA_DIR=media
-      - DEFAULT_USER_PROFILE_PIC_DIR=default_media
+      - STATIC_DIR=static
+      - DEFAULT_USER_PROFILE_PIC_PATH=static/default_media/default.png
+      - REDIRECT_URI=http://localhost:5500
     volumes:
-      - ./backend/media:/app/media
-      - ./backend/default_media:/app/default_media
+      - ./backend/static:/app/static
       - ./backend/app.db:/app/app.db
 
   frontend:

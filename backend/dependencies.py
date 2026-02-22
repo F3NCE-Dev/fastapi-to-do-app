@@ -1,6 +1,7 @@
 from fastapi import Depends, HTTPException, status
 
-from database import new_session, UserORM
+from database import new_session
+from models.user import UserORM
 
 from auth.security import oauth2_scheme
 from config.config import settings
