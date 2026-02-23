@@ -1,0 +1,6 @@
+__pycache__
+venv
+.env
+app.db
+
+backend/static/profile_pictures/**

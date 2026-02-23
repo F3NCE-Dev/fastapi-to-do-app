@@ -10,11 +10,9 @@ services:
     environment:
       - DATABASE_URL=sqlite+aiosqlite:///app.db
       - STATIC_DIR=static
-      - DEFAULT_USER_PROFILE_PIC_PATH=static/default_media/default.png
       - REDIRECT_URI=http://localhost:5500
     volumes:
       - ./backend/static:/app/static
-      - ./backend/app.db:/app/app.db
 
   frontend:
     build: ./frontend
