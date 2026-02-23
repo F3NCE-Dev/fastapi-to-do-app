@@ -1,7 +1,7 @@
 from fastapi import HTTPException, UploadFile
 
 from models.user import UserORM
-from auth.security import create_access_token
+from auth.security import create_access_token, hash_password
 from config.config import settings
 
 from sqlalchemy import select
@@ -27,6 +27,18 @@ class ProfileEditRepository:
         await db.commit()
 
         return create_access_token({"sub": new_name})
+    
+    @classmethod
+    async def edit_password(cls, user_id: int, password: str, db: AsyncSession) -> str:
+        user = await db.get(UserORM, user_id)
+
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        user.password = hash_password(password=password)
+        await db.commit()
+
+        return create_access_token({"sub": user.username})
 
     @classmethod
     async def upload_user_profile_picture(cls, data: UploadFile, user_id: int, db: AsyncSession) -> str:

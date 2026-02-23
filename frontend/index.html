@@ -170,6 +170,16 @@
                     <p id="rename-error" class="text-red-500 text-xs text-center pt-1 hidden"></p>
                 </div>
 
+                <!-- Смена пароля -->
+                <div class="space-y-2">
+                    <label for="password-input" class="block text-sm font-bold text-gray-700">New Password</label>
+                    <div class="flex gap-2">
+                        <input type="password" id="password-input" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-indigo-500">
+                        <button onclick="editPassword()" class="bg-indigo-600 text-white px-5 rounded-lg font-bold hover:bg-indigo-700 transition">Save</button>
+                    </div>
+                    <p id="password-error" class="text-red-500 text-xs text-center pt-1 hidden"></p>
+                </div>
+
                 <!-- Смена аватара -->
                 <div class="border-t border-gray-200 pt-6 space-y-4 flex flex-col items-center">
                     <div class="relative group cursor-pointer" onclick="document.getElementById('avatar-upload').click()">
@@ -217,6 +227,7 @@
         const modalAvatarPreview = document.getElementById('modal-avatar-preview');
         const renameInput = document.getElementById('rename-input');
         const renameError = document.getElementById('rename-error');
+        const passwordError = document.getElementById('password-error');
 
         // Элементы Todo
         const todoForm = document.getElementById('todo-form');
@@ -361,8 +372,18 @@
                 });
 
                 if (!response.ok) {
-                    const err = await response.json();
-                    throw new Error(err.detail || 'Registration error');
+                    const errData = await response.json();
+                    let errorMessage = 'Registration error';
+                    if (errData.detail) {
+                        if (Array.isArray(errData.detail)) {
+                            // Pydantic validation error, e.g. password too short
+                            errorMessage = errData.detail.map(e => `${e.loc[1]}: ${e.msg}`).join('; ');
+                        } else {
+                            // Other error, e.g. user already exists
+                            errorMessage = errData.detail;
+                        }
+                    }
+                    throw new Error(errorMessage);
                 }
 
                 alert('Registration successful! Please login.');
@@ -503,7 +524,17 @@
                 const data = await response.json();
 
                 if (!response.ok) {
-                    throw new Error(data.detail || 'Failed to rename profile.');
+                    let errorMessage = 'Failed to rename profile.';
+                    if (data.detail) {
+                        // Handle Pydantic validation errors (which come as an array)
+                        if (Array.isArray(data.detail)) {
+                            errorMessage = data.detail.map(err => err.msg).join(', ');
+                        } else {
+                            // Handle other errors (which come as a string, e.g., "Username already exists")
+                            errorMessage = data.detail;
+                        }
+                    }
+                    throw new Error(errorMessage);
                 }
 
                 setToken(data.access_token); // <-- Ключевой момент: обновляем токен
@@ -515,6 +546,51 @@
                 renameError.classList.remove('hidden');
             }
         }
+
+        // Редактировать пароль
+        async function editPassword() {
+            const newPassword = document.getElementById('password-input').value.trim();
+
+            passwordError.classList.add('hidden');
+            if (!newPassword) {
+                passwordError.textContent = "Password cannot be empty.";
+                passwordError.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const response = await authenticatedFetch(`${BASE_URL}/edit-password`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: newPassword })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    let errorMessage = 'Failed to edit password.';
+                    if (data.detail) {
+                        // Handle Pydantic validation errors (which come as an array)
+                        if (Array.isArray(data.detail)) {
+                            errorMessage = data.detail.map(err => err.msg).join(', ');
+                        } else {
+                            // Handle other errors (which come as a string)
+                            errorMessage = data.detail;
+                        }
+                    }
+                    throw new Error(errorMessage);
+                }
+
+                setToken(data.access_token); // Обновляем токен
+                alert('Password updated successfully!');
+                document.getElementById('password-input').value = ''; // Очищаем поле пароля после успеха
+                closeProfileModal();
+            } catch (error) {
+                passwordError.textContent = error.message;
+                passwordError.classList.remove('hidden');
+            }
+        }
+
 
         // UI Логика для профиля
         profileBtn.addEventListener('click', (e) => {
@@ -537,6 +613,8 @@
             // Заполняем поле текущим именем
             renameInput.value = dropdownUsername.textContent;
             renameError.classList.add('hidden');
+            passwordError.classList.add('hidden'); // Ensure password error is hidden too
+            document.getElementById('password-input').value = ''; // Clear the password input field
         }
 
         function closeProfileModal() {

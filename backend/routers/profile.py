@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile
 
 from services.profile import ProfileEditRepository
 from dependencies import CurrentUser, DBSession
-from schemas.user import UserNewName
+from schemas.user import UserNewName, NewPassword
 from schemas.response import StatusResponse, LoginResponse
 
 router = APIRouter(tags=["Profile Edit"])
@@ -11,6 +11,11 @@ router = APIRouter(tags=["Profile Edit"])
 async def rename_profile(new_name_data: UserNewName, current_user: CurrentUser, db: DBSession):
     new_token = await ProfileEditRepository.rename_user_profile(new_name_data.new_name, current_user.id, db)
     return {"access_token": new_token, "token_type": "bearer"}
+
+@router.patch("/edit-password", response_model=LoginResponse)
+async def edit_password(current_user: CurrentUser, new_password: NewPassword, db: DBSession):
+    token = await ProfileEditRepository.edit_password(current_user.id, new_password.password, db)
+    return {"access_token": token, "token_type": "bearer"}
 
 @router.post("/upload-profile-picture", response_model=StatusResponse)
 async def upload_profile_picture(data: UploadFile, current_user: CurrentUser, db: DBSession):
