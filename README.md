@@ -12,6 +12,7 @@ A To-Do application with authentication and profile management features.
 - **OAuth2 authentication**
 - **Add or remove a profile picture**
 - **Change a profile picture**
+- **Change password**
 
 ## Local installation
 
