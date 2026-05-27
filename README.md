@@ -90,20 +90,6 @@ DEBUG_MODE=true
 docker-compose up --build
 ```
 
-- **Access the application**
-
-Frontend:
-
-```bash
-http://localhost:5500
-```
-
-Backend API:
-
-```bash
-http://localhost:8000
-```
-
 ### Option 2: Run locally (Development)
 
 - **Run the backend**
@@ -119,6 +105,20 @@ cd ..
 ```bash
 cd frontend
 python -m http.server 5500
+```
+
+- **Access the application**
+
+Frontend:
+
+```bash
+http://localhost:5500
+```
+
+Backend API:
+
+```bash
+http://localhost:8000
 ```
 
 ## Technologies used
