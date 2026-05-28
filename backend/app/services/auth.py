@@ -1,8 +1,8 @@
 from fastapi import HTTPException, status
 
-from models.user import UserORM
-from schemas.user import UserAuthData, UserID
-from auth.security import create_access_token, hash_password, verify_password
+from app.models.user import UserORM
+from app.schemas.user import UserAuthData, UserID
+from app.auth.security import create_access_token, hash_password, verify_password
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -43,5 +43,3 @@ class AuthorizationRepository:
             id=data.id,
             username=data.username,
         )
-
-    

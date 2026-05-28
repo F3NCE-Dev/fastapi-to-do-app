@@ -1,8 +1,8 @@
 from fastapi import HTTPException, UploadFile
 
-from models.user import UserORM
-from auth.security import create_access_token, hash_password
-from config.config import settings
+from app.models.user import UserORM
+from app.auth.security import create_access_token, hash_password
+from app.config.config import settings
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

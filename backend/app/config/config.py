@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-    DATABASE_URL: str = "sqlite+aiosqlite:///backend/app.db"
+    DATABASE_URL: str = "sqlite+aiosqlite:///./app.db"
 
     DEFAULT_USER_PROFILE_PIC_PATH: str = "backend/static/default_media/default.png"
     PROFILE_PICTURES_FOLDER_NAME: str = "profile_pictures"

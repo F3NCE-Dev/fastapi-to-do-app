@@ -2,7 +2,7 @@ from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
 from datetime import datetime, timedelta, timezone
 
-from config.config import settings
+from app.config.config import settings
 import jwt
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")

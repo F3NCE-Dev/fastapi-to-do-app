@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database import Base, intpk, created_at, updated_at
-from config.config import settings
+from app.database import Base, intpk, created_at, updated_at
+from app.config.config import settings
 
 class UserORM(Base):
     __tablename__ = "users"

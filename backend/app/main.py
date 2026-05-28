@@ -3,11 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from contextlib import asynccontextmanager
-from config.config import settings
+from app.config.config import settings
 
-from database import setup_database
+from app.routers import auth, oauth, profile
+from app.database import setup_database
 
-from routers import task, auth, oauth, profile
+from app.routers import task
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 
-from services.task import TaskRepository
-from dependencies import CurrentUser, DBSession
-from schemas.task import Task, TaskAdd
-from schemas.response import StatusResponse, TaskAddResponse
+from app.services.task import TaskRepository
+from app.dependencies import CurrentUser, DBSession
+from app.schemas.task import Task, TaskAdd
+from app.schemas.response import StatusResponse, TaskAddResponse
 
 router = APIRouter(tags=["Task Handlers"])
 

@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
-from schemas.user import UserAuthData, UserID
-from schemas.response import StatusResponse, LoginResponse
-from services.auth import AuthorizationRepository
-from dependencies import DBSession, CurrentUser
+from app.schemas.user import UserAuthData, UserID
+from app.schemas.response import StatusResponse, LoginResponse
+from app.services.auth import AuthorizationRepository
+from app.dependencies import DBSession, CurrentUser
 
 from typing import Annotated
 

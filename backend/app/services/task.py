@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
-from models.task import TaskORM
-from schemas.task import TaskAdd, Task
+from app.models.task import TaskORM
+from app.schemas.task import TaskAdd, Task
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession

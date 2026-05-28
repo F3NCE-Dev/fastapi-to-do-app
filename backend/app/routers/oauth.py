@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Body
 from fastapi.responses import RedirectResponse
 
-from dependencies import DBSession
-from auth.OAuthDependencies import generate_google_oauth_uri, generate_github_oauth_uri
-from services.oauth import OAuthRepository
-from schemas.response import LoginResponse
+from app.dependencies import DBSession
+from app.auth.OAuthDependencies import generate_google_oauth_uri, generate_github_oauth_uri
+from app.services.oauth import OAuthRepository
+from app.schemas.response import LoginResponse
 
 from typing import Annotated
 

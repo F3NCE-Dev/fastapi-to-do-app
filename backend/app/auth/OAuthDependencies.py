@@ -1,4 +1,4 @@
-from config.config import settings
+from app.config.config import settings
 import urllib.parse
 
 def generate_google_oauth_uri():

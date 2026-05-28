@@ -1,10 +1,10 @@
 from fastapi import Depends, HTTPException, status
 
-from database import new_session
-from models.user import UserORM
+from app.database import new_session
+from app.models.user import UserORM
 
-from auth.security import oauth2_scheme
-from config.config import settings
+from app.auth.security import oauth2_scheme
+from app.config.config import settings
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
