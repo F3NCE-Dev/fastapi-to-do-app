@@ -7,9 +7,9 @@ class Settings(BaseSettings):
 
     DATABASE_URL: str = "sqlite+aiosqlite:///./app.db"
 
-    DEFAULT_USER_PROFILE_PIC_PATH: str = "backend/static/default_media/default.png"
+    DEFAULT_USER_PROFILE_PIC_PATH: str = "static/default_media/default.png"
     PROFILE_PICTURES_FOLDER_NAME: str = "profile_pictures"
-    STATIC_DIR: str = "backend/static"
+    STATIC_DIR: str = "static"
     
     FRONTEND_ORIGINS: list[str] = ["http://localhost:5500", "http://127.0.0.1:5500"]
     REDIRECT_URI: str = "http://localhost:5500/frontend/index.html"
