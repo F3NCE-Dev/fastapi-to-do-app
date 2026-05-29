@@ -8,6 +8,9 @@ class TaskAddResponse(BaseModel):
     success: bool
     task_id: int
 
+class ProfilePictureResponse(BaseModel):
+    url: str
+
 class LoginResponse(BaseModel):
     access_token: str
     token_type: str

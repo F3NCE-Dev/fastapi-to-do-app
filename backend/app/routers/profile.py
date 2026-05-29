@@ -3,31 +3,31 @@ from fastapi import APIRouter, UploadFile
 from app.services.profile import ProfileEditRepository
 from app.dependencies import CurrentUser, DBSession
 from app.schemas.user import UserNewName, NewPassword
-from app.schemas.response import StatusResponse, LoginResponse
+from app.schemas.response import StatusResponse, LoginResponse, ProfilePictureResponse
 
-router = APIRouter(tags=["Profile Edit"])
+router = APIRouter(prefix="/profile", tags=["Profile"])
 
-@router.patch("/rename-profile", response_model=LoginResponse)
+@router.patch("", response_model=LoginResponse)
 async def rename_profile(new_name_data: UserNewName, current_user: CurrentUser, db: DBSession):
     new_token = await ProfileEditRepository.rename_user_profile(new_name_data.new_name, current_user.id, db)
     return {"access_token": new_token, "token_type": "bearer"}
 
-@router.patch("/edit-password", response_model=LoginResponse)
+@router.patch("/password", response_model=LoginResponse)
 async def edit_password(current_user: CurrentUser, new_password: NewPassword, db: DBSession):
     token = await ProfileEditRepository.edit_password(current_user.id, new_password.password, db)
     return {"access_token": token, "token_type": "bearer"}
 
-@router.post("/upload-profile-picture", response_model=StatusResponse)
+@router.post("/picture", response_model=StatusResponse)
 async def upload_profile_picture(data: UploadFile, current_user: CurrentUser, db: DBSession):
     filename = await ProfileEditRepository.upload_user_profile_picture(data=data, user_id=current_user.id, db=db)
     return {"success": True, "detail": f"{filename} has successfully uploaded"}
 
-@router.delete("/delete-profile-picture", response_model=StatusResponse)
+@router.delete("/picture", response_model=StatusResponse)
 async def delete_profile_picture(current_user: CurrentUser, db: DBSession):
     await ProfileEditRepository.delete_user_profile_picture(current_user.id, db)
     return {"success": True, "detail": "Profile picture has successfully deleted"}
 
-@router.get("/get-profile-picture")
-async def get_profile_picture_url(current_user: CurrentUser, db: DBSession) -> str:
+@router.get("/picture", response_model=ProfilePictureResponse)
+async def get_profile_picture_url(current_user: CurrentUser, db: DBSession):
     path = await ProfileEditRepository.get_user_profile_picture_url(current_user.id, db)
-    return path
+    return {"url": path}
