@@ -415,9 +415,10 @@
         // Получить URL аватарки
         async function fetchProfilePicture() {
             try {
-                const response = await authenticatedFetch(`${BASE_URL}/get-profile-picture`);
+                const response = await authenticatedFetch(`${BASE_URL}/profile/picture`);
                 if (response.ok) {
-                    const path = await response.json();
+                    const data = await response.json();
+                    const path = data.url;
                     if (path) {
                         // Исправляем слеши для URL и добавляем BASE_URL, так как путь относительный
                         // Предполагаем, что бекенд раздает статику корректно
@@ -458,7 +459,7 @@
             formData.append('data', fileInput.files[0]);
 
             try {
-                const response = await authenticatedFetch(`${BASE_URL}/upload-profile-picture`, {
+                const response = await authenticatedFetch(`${BASE_URL}/profile/picture`, {
                     method: 'POST',
                     body: formData // Content-Type выставится автоматически браузером
                 });
@@ -479,7 +480,7 @@
             if (!confirm("Are you sure you want to delete your profile photo?")) return;
 
             try {
-                const response = await authenticatedFetch(`${BASE_URL}/delete-profile-picture`, {
+                const response = await authenticatedFetch(`${BASE_URL}/profile/picture`, {
                     method: 'DELETE'
                 });
 
@@ -515,7 +516,7 @@
             }
 
             try {
-                const response = await authenticatedFetch(`${BASE_URL}/rename-profile`, {
+                const response = await authenticatedFetch(`${BASE_URL}/profile`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ new_name: newName })
@@ -559,7 +560,7 @@
             }
 
             try {
-                const response = await authenticatedFetch(`${BASE_URL}/edit-password`, {
+                const response = await authenticatedFetch(`${BASE_URL}/profile/password`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ password: newPassword })
@@ -670,7 +671,7 @@
         // 2. Создать задачу
         async function createTodo(title) {
             try {
-                const response = await authenticatedFetch(`${BASE_URL}/add`, {
+                const response = await authenticatedFetch(`${BASE_URL}/tasks`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
@@ -693,7 +694,7 @@
                 // Бекенд использует path param для id и query param для status
                 // И метод PATCH
                 const newStatus = !currentStatus;
-                const url = `${BASE_URL}/set-task-status/${id}?status=${newStatus}`;
+                const url = `${BASE_URL}/tasks/${id}/status?status=${newStatus}`;
                 
                 const response = await authenticatedFetch(url, {
                     method: 'PATCH'
@@ -713,7 +714,7 @@
 
             try {
                 // Бекенд использует path param: /remove/{task_id}
-                const url = `${BASE_URL}/remove/${id}`;
+                const url = `${BASE_URL}/tasks/${id}`;
                 const response = await authenticatedFetch(url, {
                     method: 'DELETE'
                 });
