@@ -107,7 +107,7 @@ cd frontend
 python -m http.server 5500
 ```
 
-- **Access the application**
+### Access the application
 
 Frontend:
 
@@ -127,7 +127,9 @@ http://localhost:8000
 
 - **FastAPI**
 - **SQLAlchemy**
+- **alembic**
 - **aiosqlite**
+- **asyncpg**
 - **Pydantic**
 - **PyJWT**
 - **passlib**
